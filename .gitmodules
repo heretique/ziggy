@@ -1,0 +1,13 @@
+[submodule "3rdparty/bgfx"]
+	path = 3rdparty/bgfx
+	url = https://github.com/heretique/bgfx.git
+[submodule "3rdparty/bx"]
+	path = 3rdparty/bx
+	url = https://github.com/bkaradzic/bx.git
+[submodule "3rdparty/bimg"]
+	path = 3rdparty/bimg
+	url = https://github.com/bkaradzic/bimg.git
+[submodule "3rdparty/SDL.zig"]
+	path = 3rdparty/SDL.zig
+	url = https://github.com/MasterQ32/SDL.zig.git
+
