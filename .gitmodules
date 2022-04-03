@@ -7,7 +7,3 @@
 [submodule "3rdparty/bimg"]
 	path = 3rdparty/bimg
 	url = https://github.com/bkaradzic/bimg.git
-[submodule "3rdparty/SDL.zig"]
-	path = 3rdparty/SDL.zig
-	url = https://github.com/MasterQ32/SDL.zig.git
-
