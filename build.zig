@@ -1,6 +1,5 @@
 const std = @import("std");
 const builtin = @import("builtin");
-const sdl_sdk = @import("3rdparty/SDL.zig/Sdk.zig");
 
 const LibExeObjStep = std.build.LibExeObjStep;
 const Builder = std.build.Builder;
@@ -30,12 +29,13 @@ pub fn build(b: *Builder) void {
     exe.setTarget(target);
     exe.setBuildMode(mode);
 
-    // Create a new instance of the SDL2 Sdk
-    const sdl = sdl_sdk.init(b);
-    sdl.link(exe, .dynamic); // link SDL2 as a shared library
-    exe.addPackage(sdl.getNativePackage("sdl2"));
-    exe.addIncludeDir("src");
-    exe.addIncludeDir("c:/Users/cata/scoop/apps/sdl2/current/include/");
+
+
+    // sdl2
+    exe.addIncludeDir("3rdparty/sdl2/include");
+    exe.addLibPath("3rdparty/sdl2/win64");
+    exe.linkSystemLibrary("sdl2");
+
 
     // BX
     const bx_path = "3rdparty/bx/";
@@ -59,7 +59,6 @@ pub fn build(b: *Builder) void {
     exe.addIncludeDir(bimg_path ++ "3rdparty/");
     exe.addIncludeDir(bimg_path ++ "3rdparty/astc-codec/");
     exe.addIncludeDir(bimg_path ++ "3rdparty/astc-codec/include/");
-    exe.force_pic = true;
     exe.addCSourceFiles(&.{
         bimg_path ++ "src/image.cpp",
         bimg_path ++ "src/image_gnf.cpp",
@@ -78,6 +77,8 @@ pub fn build(b: *Builder) void {
 
     // BGFX
     const bgfx_path = "3rdparty/bgfx/";
+    // disable tinystl as it crashes
+    const bgfx_cxx_options = [_][]const u8{"-DBGFX_CONFIG_USE_TINYSTL=0"} ++ bx_cxx_options;
     exe.addIncludeDir(bx_path ++ "include/");
     exe.addIncludeDir(compat_include);
     exe.addIncludeDir(bimg_path ++ "include/");
@@ -87,7 +88,7 @@ pub fn build(b: *Builder) void {
     exe.addIncludeDir(bgfx_path ++ "3rdparty/khronos/");
     exe.addIncludeDir(bgfx_path ++ "src/");
     exe.force_pic = true;
-    exe.addCSourceFile(bgfx_path ++ "src/amalgamated.cpp", &bx_cxx_options);
+    exe.addCSourceFile(bgfx_path ++ "src/amalgamated.cpp", &bgfx_cxx_options);
     exe.addPackagePath("bgfx", "3rdparty/bgfx/bindings/zig/bgfx.zig");
 
     // exe.linkSystemLibrary("c");
@@ -95,17 +96,6 @@ pub fn build(b: *Builder) void {
     exe.linkSystemLibrary("opengl32");
     exe.linkSystemLibrary("gdi32");
     exe.install();
-
-
-    // SDL2
-    // exe.linkSystemLibrary("c");
-    // exe.linkSystemLibrary("c++");
-    // exe.addLibPath("c:/Users/cata/scoop/apps/sdl2/current/lib/");
-    // exe.linkSystemLibrary("SDL2");
-    // exe.linkLibrary(exe);
-    // exe.linkLibrary(exe);
-    // exe.linkLibrary(exe);
-    // exe.install();
 
     const run_cmd = exe.run();
     run_cmd.step.dependOn(b.getInstallStep());
