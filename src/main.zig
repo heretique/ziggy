@@ -47,9 +47,9 @@ pub fn main() !void {
     assert(success);
 
     // Enable debug text.
-    bgfx.bgfx_set_debug(@enumToInt(bgfx.DebugFlags.Text));
+    bgfx.bgfx_set_debug(bgfx.DebugFlags_Text);
     // Set view 0 clear state.
-    bgfx.bgfx_set_view_clear(0, @enumToInt(bgfx.ClearFlags.Color) | @enumToInt(bgfx.ClearFlags.Depth), 0x303030ff, 1.0 , 0);
+    bgfx.bgfx_set_view_clear(0, bgfx.ClearFlags_Color | bgfx.ClearFlags_Depth, 0x303030ff, 1.0 , 0);
     var quit = false;
     while (!quit) {
         var event: c.SDL_Event = undefined;
