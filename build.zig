@@ -5,6 +5,8 @@ const bimg = @import("build_bimg.zig");
 const bgfx = @import("build_bgfx.zig");
 const sc = @import("build_shader_compiler.zig");
 
+const zigstr = @import("build_zigstr.zig");
+
 const LibExeObjStep = std.build.LibExeObjStep;
 const Builder = std.build.Builder;
 const CrossTarget = std.zig.CrossTarget;
@@ -34,6 +36,7 @@ pub fn build(b: *Builder) void {
     bx.link(exe);
     bimg.link(exe);
     bgfx.link(exe);
+    zigstr.link(exe);
     exe.linkSystemLibrary("c");
     exe.linkSystemLibrary("c++");
     exe.linkSystemLibrary("opengl32");
