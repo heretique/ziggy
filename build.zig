@@ -6,6 +6,7 @@ const bgfx = @import("build_bgfx.zig");
 const sc = @import("build_shader_compiler.zig");
 
 const zigstr = @import("build_zigstr.zig");
+const zmath = @import("3rdparty/zmath/build.zig");
 
 const LibExeObjStep = std.build.LibExeObjStep;
 const Builder = std.build.Builder;
@@ -32,6 +33,9 @@ pub fn build(b: *Builder) void {
     exe.addIncludeDir("3rdparty/sdl2/include");
     exe.addLibPath("3rdparty/sdl2/win64");
     exe.linkSystemLibrary("sdl2");
+
+    // zmath
+    exe.addPackage(zmath.pkg);
 
     bx.link(exe);
     bimg.link(exe);
