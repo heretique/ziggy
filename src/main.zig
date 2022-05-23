@@ -153,7 +153,7 @@ pub fn main() !void {
         ;
 
     var quit = false;
-    var time:f32 = 1.0;
+    var start_time:i64 = std.time.milliTimestamp();
     while (!quit) {
         var event: c.SDL_Event = undefined;
         while (c.SDL_PollEvent(&event) != 0) {
@@ -171,13 +171,13 @@ pub fn main() !void {
         bgfx.dbgTextClear(0, false);
 
         var yy:f32 = 0;
-        time += 1;
+        var time = @intToFloat(f32, std.time.milliTimestamp() - start_time) / std.time.ms_per_s;
         while(yy < 11):(yy += 1.0) {
             var xx:f32 = 0;
             while(xx < 11):(xx += 1.0) {
                 const trans = zm.translation(-15.0 + xx * 3.0, -15 + yy * 3.0, 0.0);
-                const rotX = zm.rotationX((time + xx * 21) * 0.01);
-                const rotY = zm.rotationY((time + yy * 37) * 0.01);
+                const rotX = zm.rotationX(time + xx * 0.21);
+                const rotY = zm.rotationY(time + yy * 0.37);
                 const rotXY = zm.mul(rotX, rotY);
                 const modelMtx = zm.mul(rotXY, trans);
                 _ = bgfx.setTransform(zm.asFloats(&modelMtx), 1);
