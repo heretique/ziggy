@@ -7,6 +7,7 @@ const sc = @import("build_shader_compiler.zig");
 
 const zigstr = @import("build_zigstr.zig");
 const zmath = @import("3rdparty/zmath/build.zig");
+const imgui = @import("3rdparty/Zig-ImGui/zig-imgui/imgui_build.zig");
 
 const LibExeObjStep = std.build.LibExeObjStep;
 const Builder = std.build.Builder;
@@ -41,6 +42,7 @@ pub fn build(b: *Builder) void {
     bimg.link(exe);
     bgfx.link(exe);
     zigstr.link(exe);
+    imgui.link(exe);
     exe.linkSystemLibrary("c");
     exe.linkSystemLibrary("c++");
     exe.linkSystemLibrary("opengl32");
@@ -65,6 +67,8 @@ pub fn build(b: *Builder) void {
 
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&exe_tests.step);
+
+    imgui.addTestStep(b, "imgui:test", mode, target);
 }
 
 fn thisDir() []const u8 {

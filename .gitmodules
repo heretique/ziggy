@@ -7,3 +7,6 @@
 [submodule "3rdparty/bimg"]
 	path = 3rdparty/bimg
 	url = https://github.com/bkaradzic/bimg.git
+[submodule "3rdparty/Zig-ImGui"]
+	path = 3rdparty/Zig-ImGui
+	url = https://github.com/SpexGuy/Zig-ImGui.git

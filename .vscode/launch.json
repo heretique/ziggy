@@ -9,7 +9,7 @@
             "name": "Zig Debug Build",
             "type": "cppvsdbg",
             "request": "launch",
-            "program": "F:/Workspace/ZigProjects/ziggy/zig-cache/o/b81fee09eab79cbbcef32868f734120a/build.exe",
+            "program": "D:/WorkspaceD/ZigProjects/ziggy/zig-cache/o/582adf8083a99a56d31ada2e9a210a2b/build.exe",
             "args": [
                 "C:/Users/cata/scoop/apps/zig/current/zig.exe",
                 "F:/Workspace/ZigProjects/ziggy",
@@ -28,9 +28,22 @@
             "program": "F:/Workspace/ZigProjects/ziggy/zig-out/bin/ziggy.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "F:/Workspace/ZigProjects/ziggy/zig-out/bin",
             "environment": [],
-            "console": "externalTerminal"
+            "console": "externalTerminal",
+            "preLaunchTask": "Build"
+        },
+        {
+            "name": "Zig Debug ShaderC",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "F:/Workspace/ZigProjects/ziggy/zig-out/bin/shaderc.exe",
+            "args": ["-f", "assets/shaders/cubes/fs_cubes.sc", "--varyingdef", "assets/shaders/cubes/varying.def.sc", "-i", "assets/shaders/include", "--type", "fragment", "--platform", "windows", "--profile", "330", "--stdout", "--verbose"],
+            "stopAtEntry": false,
+            "cwd": "F:/Workspace/ZigProjects/ziggy/zig-out/bin",
+            "environment": [],
+            "console": "externalTerminal",
+            "preLaunchTask": "Build"
         }
     ]
 }

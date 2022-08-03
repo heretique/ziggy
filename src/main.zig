@@ -12,6 +12,7 @@ const bgfx = @import("bgfx");
 
 const zigstr = @import("zigstr");
 const zm = @import("zmath");
+const sc = @import("shader_compiler.zig");
 
 const WIDTH = 1280;
 const HEIGHT = 720;
@@ -89,7 +90,8 @@ pub fn main() !void {
 
     defer _ = c.SDL_DestroyWindow(window);
 
-    const test_allocator = std.testing.allocator;
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    const allocator = gpa.allocator();
 
     var bgfxInit = std.mem.zeroes(bgfx.Init);
     bgfxInit.type = bgfx.RendererType.OpenGL;
@@ -120,40 +122,35 @@ pub fn main() !void {
     const ibh = bgfx.createIndexBuffer(bgfx.makeRef(&cube_tri_list, cube_tri_list.len * @sizeOf(u16)), bgfx.BufferFlags_None);
     defer bgfx.destroyIndexBuffer(ibh);
 
-    const vertex_shader_file = try std.fs.cwd().openFile("vs_cubes.bin", .{});
-    const vertex_shader_buffer = try vertex_shader_file.readToEndAlloc(test_allocator, 1024 * 1024);
-    defer test_allocator.free(vertex_shader_buffer);
-    vertex_shader_file.close();
-    const vsh = bgfx.createShader(bgfx.makeRef(vertex_shader_buffer.ptr, @intCast(u32, vertex_shader_buffer.len)));
+    const includes = [_][]const u8{
+        "assets/shaders/include",
+    };
+
+    const defines = [_][]const u8{};
+
+    const compiledVertexShaderBuffer = try sc.compileShader("assets/shaders/cubes/vs_cubes.sc", "assets/shaders/cubes/varying.def.sc", &includes, &defines, sc.ShaderTypes.Vertex, allocator);
+    std.debug.print("Vertex Shader: {s}\n", .{compiledVertexShaderBuffer});
+    defer allocator.free(compiledVertexShaderBuffer);
+
+    const compiledFragmentShaderBuffer = try sc.compileShader("assets/shaders/cubes/fs_cubes.sc", "assets/shaders/cubes/varying.def.sc", &includes, &defines, sc.ShaderTypes.Fragment, allocator);
+    std.debug.print("Fragment Shader: {s}\n", .{compiledFragmentShaderBuffer});
+    defer allocator.free(compiledFragmentShaderBuffer);
+
+    const vsh = bgfx.createShader(bgfx.makeRef(compiledVertexShaderBuffer.ptr, @intCast(u32, compiledVertexShaderBuffer.len)));
     assert(vsh.idx != std.math.maxInt(c_ushort));
 
-    const fragment_shader_file = try std.fs.cwd().openFile("fs_cubes.bin", .{});
-    const fragment_shader_buffer = try fragment_shader_file.readToEndAlloc(test_allocator, 1024 * 1024);
-    defer test_allocator.free(fragment_shader_buffer);
-    fragment_shader_file.close();
-    const fsh = bgfx.createShader(bgfx.makeRef(fragment_shader_buffer.ptr, @intCast(u32, fragment_shader_buffer.len)));
+    const fsh = bgfx.createShader(bgfx.makeRef(compiledFragmentShaderBuffer.ptr, @intCast(u32, compiledFragmentShaderBuffer.len)));
     assert(fsh.idx != std.math.maxInt(c_ushort));
     const programHandle = bgfx.createProgram(vsh, fsh, true);
     defer bgfx.destroyProgram(programHandle);
 
+    const viewMtx = zm.lookAtRh(zm.f32x4(0.0, 0.0, -50.0, 1.0), zm.f32x4(0.0, 0.0, 0.0, 1.0), zm.f32x4(0.0, 1.0, 0.0, 0.0));
 
-    const viewMtx = zm.lookAtRh(
-        zm.f32x4(0.0, 0.0, -50.0, 1.0),
-        zm.f32x4(0.0, 0.0, 0.0, 1.0),
-        zm.f32x4(0.0, 1.0, 0.0, 0.0));
-    
     const projMtx = zm.perspectiveFovRhGl(0.25 * math.pi, aspect_ratio, 0.1, 100.0);
-    const state = 0 
-        | bgfx.StateFlags_WriteRgb
-        | bgfx.StateFlags_WriteA
-        | bgfx.StateFlags_WriteZ
-        | bgfx.StateFlags_DepthTestLess
-        | bgfx.StateFlags_CullCcw
-        | bgfx.StateFlags_Msaa
-        ;
+    const state = 0 | bgfx.StateFlags_WriteRgb | bgfx.StateFlags_WriteA | bgfx.StateFlags_WriteZ | bgfx.StateFlags_DepthTestLess | bgfx.StateFlags_CullCcw | bgfx.StateFlags_Msaa;
 
     var quit = false;
-    var start_time:i64 = std.time.milliTimestamp();
+    var start_time: i64 = std.time.milliTimestamp();
     while (!quit) {
         var event: c.SDL_Event = undefined;
         while (c.SDL_PollEvent(&event) != 0) {
@@ -170,11 +167,11 @@ pub fn main() !void {
         bgfx.touch(0);
         bgfx.dbgTextClear(0, false);
 
-        var yy:f32 = 0;
+        var yy: f32 = 0;
         var time = @intToFloat(f32, std.time.milliTimestamp() - start_time) / std.time.ms_per_s;
-        while(yy < 11):(yy += 1.0) {
-            var xx:f32 = 0;
-            while(xx < 11):(xx += 1.0) {
+        while (yy < 11) : (yy += 1.0) {
+            var xx: f32 = 0;
+            while (xx < 11) : (xx += 1.0) {
                 const trans = zm.translation(-15.0 + xx * 3.0, -15 + yy * 3.0, 0.0);
                 const rotX = zm.rotationX(time + xx * 0.21);
                 const rotY = zm.rotationY(time + yy * 0.37);
@@ -192,4 +189,8 @@ pub fn main() !void {
 
         c.SDL_Delay(17);
     }
+}
+
+test "Main" {
+    try main();
 }

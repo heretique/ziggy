@@ -1,3 +1,4 @@
 ﻿zig-cache
 zig-out
 .vscode
+*.rdbg
