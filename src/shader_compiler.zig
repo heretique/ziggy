@@ -69,7 +69,7 @@ pub fn compileShader(path: []const u8, varyings: []const u8, includes: []const [
         try compiler_args.appendSlice(arg);
         try compiler_args.append(' ');
     }
-    std.debug.print("Shader compiler args: {s}\n", .{compiler_args.items});
+    // std.debug.print("Shader compiler args: {s}\n", .{compiler_args.items});
 
     var cwd = std.fs.cwd();
     const exec_result = try ChildProcess.exec(.{

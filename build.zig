@@ -4,6 +4,7 @@ const bx = @import("build_bx.zig");
 const bimg = @import("build_bimg.zig");
 const bgfx = @import("build_bgfx.zig");
 const sc = @import("build_shader_compiler.zig");
+const tp = @import("build_texture_packer.zig");
 
 const zigstr = @import("build_zigstr.zig");
 const zmath = @import("3rdparty/zmath/build.zig");
@@ -51,6 +52,9 @@ pub fn build(b: *Builder) void {
 
     // shader compiler
     _ = sc.build(b, target, mode);
+
+    // texture packer
+    _ = tp.build(b, target, mode);
 
     const run_cmd = exe.run();
     run_cmd.step.dependOn(b.getInstallStep());

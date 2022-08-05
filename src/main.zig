@@ -129,11 +129,9 @@ pub fn main() !void {
     const defines = [_][]const u8{};
 
     const compiledVertexShaderBuffer = try sc.compileShader("assets/shaders/cubes/vs_cubes.sc", "assets/shaders/cubes/varying.def.sc", &includes, &defines, sc.ShaderTypes.Vertex, allocator);
-    std.debug.print("Vertex Shader: {s}\n", .{compiledVertexShaderBuffer});
     defer allocator.free(compiledVertexShaderBuffer);
 
     const compiledFragmentShaderBuffer = try sc.compileShader("assets/shaders/cubes/fs_cubes.sc", "assets/shaders/cubes/varying.def.sc", &includes, &defines, sc.ShaderTypes.Fragment, allocator);
-    std.debug.print("Fragment Shader: {s}\n", .{compiledFragmentShaderBuffer});
     defer allocator.free(compiledFragmentShaderBuffer);
 
     const vsh = bgfx.createShader(bgfx.makeRef(compiledVertexShaderBuffer.ptr, @intCast(u32, compiledVertexShaderBuffer.len)));

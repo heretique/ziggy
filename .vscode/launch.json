@@ -44,6 +44,18 @@
             "environment": [],
             "console": "externalTerminal",
             "preLaunchTask": "Build"
+        },
+        {
+            "name": "Zig Debug TexturePacker",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "F:/Workspace/ZigProjects/ziggy/zig-out/bin/texture_packer.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "F:/Workspace/ZigProjects/ziggy/zig-out/bin",
+            "environment": [],
+            "console": "externalTerminal",
+            "preLaunchTask": "Build"
         }
     ]
 }
