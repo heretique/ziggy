@@ -2,6 +2,13 @@ const Self = @This();
 
 const std = @import("std");
 const assert = std.debug.assert;
+const BGFXWIndow = @import("BGFXWindow.zig");
+
+// TODO get rid of SDL here and wrap entirely within BGFXWindow
+// TODO implement and "App" interface
+const c = @cImport({
+    @cInclude("SDL2/SDL.h");
+});
 
 const InitFn = fn (*anyopaque) anyerror!void;
 const UpdateFn = fn (*anyopaque, f32) anyerror!void;
@@ -12,6 +19,8 @@ initFn: InitFn,
 updateFn: UpdateFn,
 // TODO define handleInputFn and InputEvent
 shutdownFn: ShutdownFn,
+
+window: BGFXWIndow = undefined,
 
 pub fn makeImpl(ptr: anytype) Self {
     const Ptr = @TypeOf(ptr);
@@ -41,17 +50,42 @@ pub fn makeImpl(ptr: anytype) Self {
         .initFn = gen.initImpl,
         .updateFn = gen.updateImpl,
         .shutdownFn = gen.shutdownImpl,
+        .window = undefined,
     };
 }
 
-pub inline fn init(self: Self) !void {
+pub fn run(self: Self) !void {
+    errdefer self.shutdown();
+
+    var quit = false;
+    while (!quit) {
+        var event: c.SDL_Event = undefined;
+        while (c.SDL_PollEvent(&event) != 0) {
+            switch (event.@"type") {
+                c.SDL_QUIT => {
+                    quit = true;
+                },
+                else => {},
+            }
+        }
+
+        try self.update(17);
+
+        c.SDL_Delay(17);
+    }
+    self.shutdown();
+}
+
+pub fn init(self: *Self, title: [:0]const u8, x: ?u32, y: ?u32, width: u32, height: u32) !void {
+    self.window = try BGFXWIndow.makeWindow(title, x, y, width, height);
     try self.initFn(self.ptr);
 }
 
-pub inline fn update(self: Self, dt: f32) !void {
+inline fn update(self: Self, dt: f32) !void {
     try self.updateFn(self.ptr, dt);
 }
 
-pub inline fn shutdown(self: Self) void {
+fn shutdown(self: Self) void {
+    self.window.deinit();
     self.shutdownFn(self.ptr);
 }

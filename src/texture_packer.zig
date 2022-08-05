@@ -1,15 +1,6 @@
-const BGFXWIndow = @import("BGFXWindow.zig");
-
 const std = @import("std");
-const bgfx = @import("bgfx");
-
 const App = @import("App.zig");
-
-// TODO get rid of SDL here and wrap entirely within BGFXWindow
-// TODO implement and "App" interface
-const c = @cImport({
-    @cInclude("SDL2/SDL.h");
-});
+const bgfx = @import("bgfx");
 
 const WIDTH = 1280;
 const HEIGHT = 720;
@@ -17,7 +8,8 @@ const HEIGHT = 720;
 const TexturePackerApp = struct {
     const Self = @This();
 
-    empty: bool = false,
+    // added so Zig doesn't complain about '*TexturePackerApp' has no in-memory bits
+    _: bool = false,
 
     pub fn app(self: *Self) App {
         return App.makeImpl(self);
@@ -29,7 +21,7 @@ const TexturePackerApp = struct {
         bgfx.setDebug(bgfx.DebugFlags_Text);
         // Set view 0 clear state.
         bgfx.setViewClear(0, bgfx.ClearFlags_Color | bgfx.ClearFlags_Depth, 0x303030ff, 1.0, 0);
-        std.debug.print("Initialized app...", .{});
+        std.debug.print("Initialized app...\n", .{});
     }
 
     pub fn update(self: *Self, dt: f32) !void {
@@ -43,14 +35,11 @@ const TexturePackerApp = struct {
 
     pub fn shutdown(self: *Self) void {
         _ = self;
-        std.debug.print("Shutting down...", .{});
+        std.debug.print("Shutting down...\n", .{});
     }
 };
 
 pub fn main() !void {
-    var window = try BGFXWIndow.makeWindow("Texture Packer", undefined, undefined, WIDTH, HEIGHT);
-    defer window.deinit();
-
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
     _ = allocator;
@@ -58,24 +47,6 @@ pub fn main() !void {
     var texturePackerApp = TexturePackerApp{};
     var app = texturePackerApp.app();
 
-    try app.init();
-
-    var quit = false;
-    while (!quit) {
-        var event: c.SDL_Event = undefined;
-        while (c.SDL_PollEvent(&event) != 0) {
-            switch (event.@"type") {
-                c.SDL_QUIT => {
-                    quit = true;
-                },
-                else => {},
-            }
-        }
-
-        try app.update(17);
-
-        c.SDL_Delay(17);
-    }
-
-    app.shutdown();
+    try app.init("Texture Packer", undefined, undefined, WIDTH, HEIGHT);
+    try app.run();
 }
