@@ -2,6 +2,7 @@ const Self = @This();
 
 const std = @import("std");
 const bgfx = @import("bgfx");
+const builtin = @import("builtin");
 
 const c = @cImport({
     @cInclude("SDL2/SDL.h");
@@ -34,7 +35,11 @@ pub fn makeWindow(title: [:0]const u8, x: ?u32, y: ?u32, width: u32, height: u32
     var wmi = std.mem.zeroes(c.SDL_SysWMinfo);
     _ = c.SDL_GetWindowWMInfo(window, &wmi);
 
-    bgfxInit.platformData.nwh = wmi.info.win.window;
+    if (builtin.target.isDarwin()) {
+        bgfxInit.platformData.nwh = wmi.info.cocoa.window;
+    } else if (builtin.target.os.tag == .windows) {
+        bgfxInit.platformData.nwh = wmi.info.win.window;
+    }
 
     const success = bgfx.init(&bgfxInit);
     if (!success) {

@@ -368,7 +368,7 @@ pub fn build(b: *Builder, target: std.zig.CrossTarget, build_mode: std.builtin.M
     if (target.isWindows()) {
         glslang_lib.addCSourceFile(glslang_path ++ "glslang/OSDependent/Windows/ossource.cpp", &glslang_cxx_options);
     }
-    if (target.isLinux()) {
+    if (target.isLinux() or target.isDarwin()) {
         glslang_lib.addCSourceFile(glslang_path ++ "glslang/OSDependent/Unix/ossource.cpp", &glslang_cxx_options);
     }
 
@@ -589,6 +589,11 @@ pub fn build(b: *Builder, target: std.zig.CrossTarget, build_mode: std.builtin.M
     exe.linkLibrary(spirv_opt_lib);
     exe.linkLibrary(spirv_cross_lib);
     exe.linkSystemLibrary("c++");
+
+    if (target.isDarwin()) {
+        exe.linkFramework("CoreFoundation");
+        exe.linkFramework("Foundation");
+    }
 
     exe.install();
     return exe;

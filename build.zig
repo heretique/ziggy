@@ -32,9 +32,24 @@ pub fn build(b: *Builder) void {
     exe.setBuildMode(mode);
 
     // sdl2
-    exe.addIncludeDir("3rdparty/sdl2/include");
-    exe.addLibPath("3rdparty/sdl2/win64");
-    exe.linkSystemLibrary("sdl2");
+    if (target.isDarwin()){
+        exe.addFrameworkDir("3rdparty/sdl2/osx");
+        exe.linkFramework("sdl2");
+        exe.linkFramework("Foundation");
+        exe.linkFramework("CoreFoundation");
+        exe.linkFramework("Cocoa");
+        exe.linkFramework("QuartzCore");
+        exe.linkFramework("OpenGL");
+        exe.linkFramework("IOKit");
+        exe.linkFramework("Metal");
+    }
+    else if (target.isWindows()) {
+        exe.addIncludeDir("3rdparty/sdl2/windows/include");
+        exe.addLibPath("3rdparty/sdl2/windows/win64");
+        exe.linkSystemLibrary("sdl2");
+        exe.linkSystemLibrary("opengl32");
+        exe.linkSystemLibrary("gdi32");
+    }
 
     // zmath
     exe.addPackage(zmath.pkg);
@@ -46,8 +61,6 @@ pub fn build(b: *Builder) void {
     imgui.link(exe);
     exe.linkSystemLibrary("c");
     exe.linkSystemLibrary("c++");
-    exe.linkSystemLibrary("opengl32");
-    exe.linkSystemLibrary("gdi32");
     exe.install();
 
     // shader compiler

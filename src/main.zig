@@ -14,6 +14,8 @@ const zigstr = @import("zigstr");
 const zm = @import("zmath");
 const sc = @import("shader_compiler.zig");
 
+const builtin = @import("builtin");
+
 const WIDTH = 1280;
 const HEIGHT = 720;
 
@@ -104,7 +106,12 @@ pub fn main() !void {
     var wmi = std.mem.zeroes(c.SDL_SysWMinfo);
     _ = c.SDL_GetWindowWMInfo(window, &wmi);
 
-    bgfxInit.platformData.nwh = wmi.info.win.window;
+    if (builtin.target.isDarwin()) {
+        bgfxInit.platformData.nwh = wmi.info.cocoa.window;
+    } else if (builtin.target.os.tag == .windows) {
+        bgfxInit.platformData.nwh = wmi.info.win.window;
+    }
+
 
     const success = bgfx.init(&bgfxInit);
     defer bgfx.shutdown();
