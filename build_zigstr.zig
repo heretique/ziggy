@@ -16,6 +16,6 @@ fn buildLibrary(exe: *std.build.LibExeObjStep) *std.build.LibExeObjStep {
     return lib;
 }
 
-fn thisDir() []const u8 {
-    return std.fs.path.dirname(@src().file) orelse ".";
+inline fn thisDir() []const u8 {
+    return comptime std.fs.path.dirname(@src().file) orelse ".";
 }

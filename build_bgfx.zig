@@ -28,11 +28,11 @@ fn buildLibrary(exe: *std.build.LibExeObjStep) *std.build.LibExeObjStep {
     bgfx_lib.setTarget(exe.target);
     bgfx_lib.setBuildMode(exe.build_mode);
 
-    bgfx_lib.addIncludeDir(bgfx_path ++ "include/");
-    bgfx_lib.addIncludeDir(bgfx_path ++ "3rdparty/");
-    bgfx_lib.addIncludeDir(bgfx_path ++ "3rdparty/dxsdk/include/");
-    bgfx_lib.addIncludeDir(bgfx_path ++ "3rdparty/khronos/");
-    bgfx_lib.addIncludeDir(bgfx_path ++ "src/");
+    bgfx_lib.addIncludePath(bgfx_path ++ "include/");
+    bgfx_lib.addIncludePath(bgfx_path ++ "3rdparty/");
+    bgfx_lib.addIncludePath(bgfx_path ++ "3rdparty/directx-headers/include/directx/");
+    bgfx_lib.addIncludePath(bgfx_path ++ "3rdparty/khronos/");
+    bgfx_lib.addIncludePath(bgfx_path ++ "src/");
 
     if (bgfx_lib.target.isDarwin()) {
         bgfx_lib.addCSourceFile(bgfx_path ++ "src/amalgamated.mm", &cxx_options);
@@ -45,6 +45,9 @@ fn buildLibrary(exe: *std.build.LibExeObjStep) *std.build.LibExeObjStep {
         bgfx_lib.linkFramework("QuartzCore");
     } else {
         bgfx_lib.addCSourceFile(bgfx_path ++ "src/amalgamated.cpp", &cxx_options);
+        // if (bgfx_lib.target.isWindows()) {
+
+        // }
     }
 
     bgfx_lib.want_lto = false;
@@ -59,12 +62,12 @@ fn buildLibrary(exe: *std.build.LibExeObjStep) *std.build.LibExeObjStep {
 }
 
 fn addBgfxIncludes(exe: *std.build.LibExeObjStep) void {
-    exe.addIncludeDir(thisDir() ++ "/" ++ bgfx_path ++ "include/");
+    exe.addIncludePath(thisDir() ++ "/" ++ bgfx_path ++ "include/");
     exe.addPackagePath("bgfx", thisDir() ++ "/" ++ bgfx_path ++ "bindings/zig/bgfx.zig");
 }
 
-fn thisDir() []const u8 {
-    return std.fs.path.dirname(@src().file) orelse ".";
+inline fn thisDir() []const u8 {
+    return comptime std.fs.path.dirname(@src().file) orelse ".";
 }
 
 // /// helper function to get SDK path on Mac

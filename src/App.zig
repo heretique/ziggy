@@ -10,9 +10,9 @@ const c = @cImport({
     @cInclude("SDL2/SDL.h");
 });
 
-const InitFn = fn (*anyopaque) anyerror!void;
-const UpdateFn = fn (*anyopaque, f32) anyerror!void;
-const ShutdownFn = fn (*anyopaque) void;
+const InitFn = *const fn (*anyopaque) anyerror!void;
+const UpdateFn = *const fn (*anyopaque, f32) anyerror!bool;
+const ShutdownFn = *const fn (*anyopaque) void;
 
 ptr: *anyopaque,
 initFn: InitFn,
@@ -33,15 +33,15 @@ pub fn makeImpl(ptr: anytype) Self {
     const gen = struct {
         pub fn initImpl(pointer: *anyopaque) !void {
             const self = @ptrCast(Ptr, @alignCast(alignment, pointer));
-            try @call(.{ .modifier = .always_inline }, ptr_info.Pointer.child.init, .{self});
+            try @call(.always_inline, ptr_info.Pointer.child.init, .{self});
         }
-        pub fn updateImpl(pointer: *anyopaque, dt: f32) !void {
+        pub fn updateImpl(pointer: *anyopaque, dt: f32) !bool {
             const self = @ptrCast(Ptr, @alignCast(alignment, pointer));
-            try @call(.{ .modifier = .always_inline }, ptr_info.Pointer.child.update, .{ self, dt });
+            return try @call(.always_inline, ptr_info.Pointer.child.update, .{ self, dt });
         }
         pub fn shutdownImpl(pointer: *anyopaque) void {
             const self = @ptrCast(Ptr, @alignCast(alignment, pointer));
-            return @call(.{ .modifier = .always_inline }, ptr_info.Pointer.child.shutdown, .{self});
+            return @call(.always_inline, ptr_info.Pointer.child.shutdown, .{self});
         }
     };
 
@@ -54,22 +54,27 @@ pub fn makeImpl(ptr: anytype) Self {
     };
 }
 
-pub fn run(self: Self) !void {
+pub fn run(self: *Self) !void {
     errdefer self.shutdown();
 
     var quit = false;
-    while (!quit) {
+    main: while (!quit) {
         var event: c.SDL_Event = undefined;
         while (c.SDL_PollEvent(&event) != 0) {
             switch (event.@"type") {
                 c.SDL_QUIT => {
                     quit = true;
+                    break :main;
                 },
-                else => {},
+                else => {
+                    // _ = self.window.handleSDLInputEvent(&event);
+                },
             }
         }
 
-        try self.update(17);
+        // self.window.newFrame();
+
+        quit = try self.update(17);
 
         c.SDL_Delay(17);
     }
@@ -81,11 +86,11 @@ pub fn init(self: *Self, title: [:0]const u8, x: ?u32, y: ?u32, width: u32, heig
     try self.initFn(self.ptr);
 }
 
-inline fn update(self: Self, dt: f32) !void {
-    try self.updateFn(self.ptr, dt);
+inline fn update(self: Self, dt: f32) !bool {
+    return try self.updateFn(self.ptr, dt);
 }
 
-fn shutdown(self: Self) void {
+fn shutdown(self: *Self) void {
     self.window.deinit();
     self.shutdownFn(self.ptr);
 }

@@ -106,12 +106,11 @@ pub fn main() !void {
     var wmi = std.mem.zeroes(c.SDL_SysWMinfo);
     _ = c.SDL_GetWindowWMInfo(window, &wmi);
 
-    if (builtin.target.isDarwin()) {
-        bgfxInit.platformData.nwh = wmi.info.cocoa.window;
-    } else if (builtin.target.os.tag == .windows) {
+    if (builtin.target.os.tag == .windows) {
         bgfxInit.platformData.nwh = wmi.info.win.window;
+    } else if (builtin.target.isDarwin()) {
+        bgfxInit.platformData.nwh = wmi.info.cocoa.window;
     }
-
 
     const success = bgfx.init(&bgfxInit);
     defer bgfx.shutdown();
@@ -167,7 +166,7 @@ pub fn main() !void {
             }
         }
 
-        bgfx.setViewTransform(0, zm.asFloats(&viewMtx), zm.asFloats(&projMtx));
+        bgfx.setViewTransform(0, &zm.matToArr(viewMtx), &zm.matToArr(projMtx));
         bgfx.setViewRect(0, 0, 0, WIDTH, HEIGHT);
         bgfx.touch(0);
         bgfx.dbgTextClear(0, false);
@@ -182,7 +181,7 @@ pub fn main() !void {
                 const rotY = zm.rotationY(time + yy * 0.37);
                 const rotXY = zm.mul(rotX, rotY);
                 const modelMtx = zm.mul(rotXY, trans);
-                _ = bgfx.setTransform(zm.asFloats(&modelMtx), 1);
+                _ = bgfx.setTransform(&zm.matToArr(modelMtx), 1);
                 bgfx.setVertexBuffer(0, vbh, 0, cube_vertices.len);
                 bgfx.setIndexBuffer(ibh, 0, cube_tri_list.len);
                 bgfx.setState(state, 0);

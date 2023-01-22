@@ -24,13 +24,16 @@ const TexturePackerApp = struct {
         std.debug.print("Initialized app...\n", .{});
     }
 
-    pub fn update(self: *Self, dt: f32) !void {
+    // return true to quit
+    pub fn update(self: *Self, dt: f32) !bool {
         _ = self;
         _ = dt;
 
         bgfx.setViewRect(0, 0, 0, WIDTH, HEIGHT);
         bgfx.touch(0);
         _ = bgfx.frame(false);
+
+        return false;
     }
 
     pub fn shutdown(self: *Self) void {

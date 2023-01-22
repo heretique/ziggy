@@ -20,23 +20,35 @@ fn buildLibrary(exe: *std.build.LibExeObjStep) *std.build.LibExeObjStep {
 
     const bimg_lib = exe.builder.addStaticLibrary("bimg", null);
     addBimgIncludes(bimg_lib);
-    bimg_lib.addIncludeDir(bimg_path ++ "3rdparty/");
-    bimg_lib.addIncludeDir(bimg_path ++ "3rdparty/astc-codec/");
-    bimg_lib.addIncludeDir(bimg_path ++ "3rdparty/astc-codec/include/");
+    bimg_lib.addIncludePath(bimg_path ++ "3rdparty/");
+    bimg_lib.addIncludePath(bimg_path ++ "3rdparty/astc-encoder/");
+    bimg_lib.addIncludePath(bimg_path ++ "3rdparty/astc-encoder/include/");
     bimg_lib.addCSourceFiles(&.{
         bimg_path ++ "src/image.cpp",
         bimg_path ++ "src/image_gnf.cpp",
-        bimg_path ++ "3rdparty/astc-codec/src/decoder/astc_file.cc",
-        bimg_path ++ "3rdparty/astc-codec/src/decoder/codec.cc",
-        bimg_path ++ "3rdparty/astc-codec/src/decoder/endpoint_codec.cc",
-        bimg_path ++ "3rdparty/astc-codec/src/decoder/footprint.cc",
-        bimg_path ++ "3rdparty/astc-codec/src/decoder/integer_sequence_codec.cc",
-        bimg_path ++ "3rdparty/astc-codec/src/decoder/intermediate_astc_block.cc",
-        bimg_path ++ "3rdparty/astc-codec/src/decoder/logical_astc_block.cc",
-        bimg_path ++ "3rdparty/astc-codec/src/decoder/partition.cc",
-        bimg_path ++ "3rdparty/astc-codec/src/decoder/physical_astc_block.cc",
-        bimg_path ++ "3rdparty/astc-codec/src/decoder/quantization.cc",
-        bimg_path ++ "3rdparty/astc-codec/src/decoder/weight_infill.cc",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_averages_and_directions.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_block_sizes.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_color_quantize.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_color_unquantize.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_compress_symbolic.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_compute_variance.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_decompress_symbolic.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_diagnostic_trace.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_entry.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_find_best_partitioning.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_ideal_endpoints_and_weights.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_image.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_integer_sequence.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_mathlib.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_mathlib_softfloat.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_partition_tables.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_percentile_tables.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_pick_best_endpoint_format.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_platform_isa_detection.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_quantization.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_symbolic_physical.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_weight_align.cpp",
+        bimg_path ++ "3rdparty/astc-encoder/source/astcenc_weight_quant_xfer_tables.cpp",
     }, &cxx_options);
     bimg_lib.want_lto = false;
     bimg_lib.linkSystemLibrary("c");
@@ -49,9 +61,9 @@ fn buildLibrary(exe: *std.build.LibExeObjStep) *std.build.LibExeObjStep {
 }
 
 fn addBimgIncludes(exe: *std.build.LibExeObjStep) void {
-    exe.addIncludeDir(thisDir() ++ "/" ++ bimg_path ++ "include/");
+    exe.addIncludePath(thisDir() ++ "/" ++ bimg_path ++ "include/");
 }
 
-fn thisDir() []const u8 {
-    return std.fs.path.dirname(@src().file) orelse ".";
+inline fn thisDir() []const u8 {
+    return comptime std.fs.path.dirname(@src().file) orelse ".";
 }

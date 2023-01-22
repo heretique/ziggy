@@ -6,7 +6,7 @@ const bgfx = @import("build_bgfx.zig");
 
 const zigstr = @import("build_zigstr.zig");
 const zmath = @import("3rdparty/zmath/build.zig");
-const imgui = @import("3rdparty/Zig-ImGui/zig-imgui/imgui_build.zig");
+const zgui = @import("3rdparty/zgui/build.zig");
 
 const LibExeObjStep = std.build.LibExeObjStep;
 const Builder = std.build.Builder;
@@ -21,7 +21,7 @@ pub fn build(b: *Builder, target: std.zig.CrossTarget, build_mode: std.builtin.M
 
     // sdl2
     if (target.isDarwin()){
-        exe.addFrameworkDir("3rdparty/sdl2/osx");
+        exe.addFrameworkPath("3rdparty/sdl2/osx");
         exe.linkFramework("sdl2");
         exe.linkFramework("Foundation");
         exe.linkFramework("CoreFoundation");
@@ -32,18 +32,30 @@ pub fn build(b: *Builder, target: std.zig.CrossTarget, build_mode: std.builtin.M
         exe.linkFramework("Metal");
     }
     else if (target.isWindows()) {
-        exe.addIncludeDir("3rdparty/sdl2/windows/include");
-        exe.addLibPath("3rdparty/sdl2/windows/win64");
+        exe.addIncludePath("3rdparty/sdl2/windows/include");
+        exe.addLibraryPath("3rdparty/sdl2/windows/win64");
         exe.linkSystemLibrary("sdl2");
         exe.linkSystemLibrary("opengl32");
         exe.linkSystemLibrary("gdi32");
+        exe.linkSystemLibrary("winmm");
+        exe.linkSystemLibrary("setupapi");
+        exe.linkSystemLibrary("ole32");
+        exe.linkSystemLibrary("oleaut32");
+        exe.linkSystemLibrary("imm32");
+        exe.linkSystemLibrary("version");
     }
 
     bx.link(exe);
     bimg.link(exe);
     bgfx.link(exe);
     zigstr.link(exe);
-    imgui.link(exe);
+
+    // zgui
+    const zgui_options = zgui.BuildOptionsStep.init(b, .{ .backend = .no_backend });
+    const zgui_pkg = zgui.getPkg(&.{zgui_options.getPkg()});
+    exe.addPackage(zgui_pkg);
+    zgui.link(exe, zgui_options);
+
     exe.linkSystemLibrary("c");
     exe.linkSystemLibrary("c++");
 

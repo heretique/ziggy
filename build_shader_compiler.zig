@@ -24,7 +24,7 @@ pub fn build(b: *Builder, target: std.zig.CrossTarget, build_mode: std.builtin.M
 
     const fcpp_path = "3rdparty/bgfx/3rdparty/fcpp/";
     const fcpp_lib = b.addStaticLibrary("fcpp", null);
-    fcpp_lib.addIncludeDir(fcpp_path);
+    fcpp_lib.addIncludePath(fcpp_path);
     fcpp_lib.addCSourceFiles(&.{
         fcpp_path ++ "cpp1.c",
         fcpp_path ++ "cpp2.c",
@@ -50,11 +50,11 @@ pub fn build(b: *Builder, target: std.zig.CrossTarget, build_mode: std.builtin.M
 
     const spirv_opt_path = "3rdparty/bgfx/3rdparty/spirv-tools/";
     const spirv_opt_lib = b.addStaticLibrary("spirv-opt", null);
-    spirv_opt_lib.addIncludeDir(spirv_opt_path);
-    spirv_opt_lib.addIncludeDir(spirv_opt_path ++ "include");
-    spirv_opt_lib.addIncludeDir(spirv_opt_path ++ "include/generated");
-    spirv_opt_lib.addIncludeDir(spirv_opt_path ++ "source");
-    spirv_opt_lib.addIncludeDir("3rdparty/bgfx/3rdparty/spirv-headers/include");
+    spirv_opt_lib.addIncludePath(spirv_opt_path);
+    spirv_opt_lib.addIncludePath(spirv_opt_path ++ "include");
+    spirv_opt_lib.addIncludePath(spirv_opt_path ++ "include/generated");
+    spirv_opt_lib.addIncludePath(spirv_opt_path ++ "source");
+    spirv_opt_lib.addIncludePath("3rdparty/bgfx/3rdparty/spirv-headers/include");
 
     spirv_opt_lib.addCSourceFiles(&.{
         spirv_opt_path ++ "source/assembly_grammar.cpp",
@@ -69,6 +69,7 @@ pub fn build(b: *Builder, target: std.zig.CrossTarget, build_mode: std.builtin.M
         spirv_opt_path ++ "source/opcode.cpp",
         spirv_opt_path ++ "source/operand.cpp",
         spirv_opt_path ++ "source/opt/aggressive_dead_code_elim_pass.cpp",
+        spirv_opt_path ++ "source/opt/analyze_live_input_pass.cpp",
         spirv_opt_path ++ "source/opt/amd_ext_to_khr.cpp",
         spirv_opt_path ++ "source/opt/basic_block.cpp",
         spirv_opt_path ++ "source/opt/block_merge_pass.cpp",
@@ -96,11 +97,12 @@ pub fn build(b: *Builder, target: std.zig.CrossTarget, build_mode: std.builtin.M
         spirv_opt_path ++ "source/opt/desc_sroa_util.cpp",
         spirv_opt_path ++ "source/opt/dominator_analysis.cpp",
         spirv_opt_path ++ "source/opt/dominator_tree.cpp",
-        spirv_opt_path ++ "source/opt/eliminate_dead_input_components_pass.cpp",
         spirv_opt_path ++ "source/opt/eliminate_dead_constant_pass.cpp",
         spirv_opt_path ++ "source/opt/eliminate_dead_functions_pass.cpp",
         spirv_opt_path ++ "source/opt/eliminate_dead_functions_util.cpp",
+        spirv_opt_path ++ "source/opt/eliminate_dead_io_components_pass.cpp",
         spirv_opt_path ++ "source/opt/eliminate_dead_members_pass.cpp",
+        spirv_opt_path ++ "source/opt/eliminate_dead_output_stores_pass.cpp",
         spirv_opt_path ++ "source/opt/feature_manager.cpp",
         spirv_opt_path ++ "source/opt/fix_func_call_arguments.cpp",
         spirv_opt_path ++ "source/opt/fix_storage_class.cpp",
@@ -125,6 +127,7 @@ pub fn build(b: *Builder, target: std.zig.CrossTarget, build_mode: std.builtin.M
         spirv_opt_path ++ "source/opt/ir_context.cpp",
         spirv_opt_path ++ "source/opt/ir_loader.cpp",
         spirv_opt_path ++ "source/opt/licm_pass.cpp",
+        spirv_opt_path ++ "source/opt/liveness.cpp",
         spirv_opt_path ++ "source/opt/local_access_chain_convert_pass.cpp",
         spirv_opt_path ++ "source/opt/local_redundancy_elimination.cpp",
         spirv_opt_path ++ "source/opt/local_single_block_elim_pass.cpp",
@@ -249,11 +252,14 @@ pub fn build(b: *Builder, target: std.zig.CrossTarget, build_mode: std.builtin.M
         spirv_opt_path ++ "source/val/validate_logicals.cpp",
         spirv_opt_path ++ "source/val/validate_memory.cpp",
         spirv_opt_path ++ "source/val/validate_memory_semantics.cpp",
+        spirv_opt_path ++ "source/val/validate_mesh_shading.cpp",
         spirv_opt_path ++ "source/val/validate_misc.cpp",
         spirv_opt_path ++ "source/val/validate_mode_setting.cpp",
         spirv_opt_path ++ "source/val/validate_non_uniform.cpp",
         spirv_opt_path ++ "source/val/validate_primitives.cpp",
         spirv_opt_path ++ "source/val/validate_ray_query.cpp",
+        spirv_opt_path ++ "source/val/validate_ray_tracing.cpp",
+        spirv_opt_path ++ "source/val/validate_ray_tracing_reorder.cpp",
         spirv_opt_path ++ "source/val/validate_scopes.cpp",
         spirv_opt_path ++ "source/val/validate_small_type_uses.cpp",
         spirv_opt_path ++ "source/val/validate_type.cpp",
@@ -277,7 +283,7 @@ pub fn build(b: *Builder, target: std.zig.CrossTarget, build_mode: std.builtin.M
 
     const spirv_cross_path = "3rdparty/bgfx/3rdparty/spirv-cross/";
     const spirv_cross_lib = b.addStaticLibrary("spirv-cross", null);
-    spirv_cross_lib.addIncludeDir(spirv_cross_path ++ "include");
+    spirv_cross_lib.addIncludePath(spirv_cross_path ++ "include");
     spirv_cross_lib.addCSourceFiles(&.{
         spirv_cross_path ++ "spirv_cfg.cpp",
         spirv_cross_path ++ "spirv_cpp.cpp",
@@ -309,11 +315,11 @@ pub fn build(b: *Builder, target: std.zig.CrossTarget, build_mode: std.builtin.M
 
     const glslang_path = "3rdparty/bgfx/3rdparty/glslang/";
     const glslang_lib = b.addStaticLibrary("glslang", null);
-    glslang_lib.addIncludeDir("3rdparty/bgfx/3rdparty");
-    glslang_lib.addIncludeDir(glslang_path);
-    glslang_lib.addIncludeDir(glslang_path ++ "include");
-    glslang_lib.addSystemIncludeDir(spirv_opt_path ++ "include");
-    glslang_lib.addSystemIncludeDir(spirv_opt_path ++ "source");
+    glslang_lib.addIncludePath("3rdparty/bgfx/3rdparty");
+    glslang_lib.addIncludePath(glslang_path);
+    glslang_lib.addIncludePath(glslang_path ++ "include");
+    glslang_lib.addSystemIncludePath(spirv_opt_path ++ "include");
+    glslang_lib.addSystemIncludePath(spirv_opt_path ++ "source");
     glslang_lib.addCSourceFiles(&.{
         glslang_path ++ "OGLCompilersDLL/InitializeDll.cpp",
         glslang_path ++ "SPIRV/GlslangToSpv.cpp",
@@ -362,7 +368,6 @@ pub fn build(b: *Builder, target: std.zig.CrossTarget, build_mode: std.builtin.M
         glslang_path ++ "glslang/MachineIndependent/preprocessor/PpTokens.cpp",
         glslang_path ++ "glslang/MachineIndependent/propagateNoContraction.cpp",
         glslang_path ++ "glslang/MachineIndependent/reflection.cpp",
-        glslang_path ++ "glslang/OSDependent/Web/glslang.js.cpp",
     }, &glslang_cxx_options);
 
     if (target.isWindows()) {
@@ -416,11 +421,11 @@ pub fn build(b: *Builder, target: std.zig.CrossTarget, build_mode: std.builtin.M
 
     const glsl_optimizer_path = "3rdparty/bgfx/3rdparty/glsl-optimizer/";
     const glsl_optimizer_lib = b.addStaticLibrary("glsl-optimizer", null);
-    glsl_optimizer_lib.addIncludeDir(glsl_optimizer_path ++ "include");
-    glsl_optimizer_lib.addIncludeDir(glsl_optimizer_path ++ "src");
-    glsl_optimizer_lib.addIncludeDir(glsl_optimizer_path ++ "src/mesa");
-    glsl_optimizer_lib.addIncludeDir(glsl_optimizer_path ++ "src/mapi");
-    glsl_optimizer_lib.addIncludeDir(glsl_optimizer_path ++ "src/glsl");
+    glsl_optimizer_lib.addIncludePath(glsl_optimizer_path ++ "include");
+    glsl_optimizer_lib.addIncludePath(glsl_optimizer_path ++ "src");
+    glsl_optimizer_lib.addIncludePath(glsl_optimizer_path ++ "src/mesa");
+    glsl_optimizer_lib.addIncludePath(glsl_optimizer_path ++ "src/mapi");
+    glsl_optimizer_lib.addIncludePath(glsl_optimizer_path ++ "src/glsl");
 
     // add C++ files
     glsl_optimizer_lib.addCSourceFiles(&.{
@@ -551,19 +556,19 @@ pub fn build(b: *Builder, target: std.zig.CrossTarget, build_mode: std.builtin.M
     const bgfx_path = "3rdparty/bgfx/";
     const exe = b.addExecutable("shaderc", null);
 
-    exe.addIncludeDir("3rdparty/bimg/include");
-    exe.addIncludeDir(bgfx_path ++ "include");
-    exe.addIncludeDir(bgfx_path ++ "src");
-    exe.addIncludeDir(bgfx_path ++ "3rdparty/dxsdk/include");
-    exe.addIncludeDir(bgfx_path ++ "3rdparty/fcpp");
-    exe.addIncludeDir(bgfx_path ++ "3rdparty/glslang/glslang/Public");
-    exe.addIncludeDir(bgfx_path ++ "3rdparty/glslang/glslang/Include");
-    exe.addIncludeDir(bgfx_path ++ "3rdparty/glslang");
-    exe.addIncludeDir(bgfx_path ++ "3rdparty/glsl-optimizer/include");
-    exe.addIncludeDir(bgfx_path ++ "3rdparty/glsl-optimizer/src/glsl");
-    exe.addIncludeDir(bgfx_path ++ "3rdparty/spirv-cross");
-    exe.addIncludeDir(bgfx_path ++ "3rdparty/spirv-tools/include");
-    exe.addIncludeDir(bgfx_path ++ "3rdparty/webgpu/include");
+    exe.addIncludePath("3rdparty/bimg/include");
+    exe.addIncludePath(bgfx_path ++ "include");
+    exe.addIncludePath(bgfx_path ++ "src");
+    exe.addIncludePath(bgfx_path ++ "3rdparty/dxsdk/include");
+    exe.addIncludePath(bgfx_path ++ "3rdparty/fcpp");
+    exe.addIncludePath(bgfx_path ++ "3rdparty/glslang/glslang/Public");
+    exe.addIncludePath(bgfx_path ++ "3rdparty/glslang/glslang/Include");
+    exe.addIncludePath(bgfx_path ++ "3rdparty/glslang");
+    exe.addIncludePath(bgfx_path ++ "3rdparty/glsl-optimizer/include");
+    exe.addIncludePath(bgfx_path ++ "3rdparty/glsl-optimizer/src/glsl");
+    exe.addIncludePath(bgfx_path ++ "3rdparty/spirv-cross");
+    exe.addIncludePath(bgfx_path ++ "3rdparty/spirv-tools/include");
+    exe.addIncludePath(bgfx_path ++ "3rdparty/webgpu/include");
     exe.addCSourceFiles(&.{
         bgfx_path ++ "src/shader.cpp",
         bgfx_path ++ "src/shader_dx9bc.cpp",

@@ -1,14 +1,16 @@
-# zmath v0.3 - SIMD math library for game developers
+# zmath v0.9.5 - SIMD math library for game developers
 
-Should work on all OSes supported by Zig. Works on x86_64 and ARM.
+Tested on x86_64 and AArch64.
 
 Provides ~140 optimized routines and ~70 extensive tests.
 
 Can be used with any graphics API.
 
-See functions list in the [code](https://github.com/michal-z/zig-gamedev/blob/main/libs/zmath/src/zmath.zig).
+Documentation can be found [here](https://github.com/michal-z/zig-gamedev/blob/main/libs/zmath/src/zmath.zig).
 
-Read [intro article](https://github.com/michal-z/zig-gamedev/wiki/Fast,-multi-platform,-SIMD-math-library-in-Zig).
+Benchamrks can be found [here](https://github.com/michal-z/zig-gamedev/blob/main/libs/zmath/src/benchmark.zig).
+
+An intro article can be found [here](https://zig.news/michalz/fast-multi-platform-simd-math-library-in-zig-2adn).
 
 ## Getting started
 
@@ -48,7 +50,7 @@ pub fn main() !void {
     const object_to_clip = zm.mul(object_to_view, view_to_clip);
 
     // Transposition is needed because GLSL uses column-major matrices by default
-    gl.uniformMatrix4fv(0, 1, gl.TRUE, zm.asFloats(&object_to_clip));
+    gl.uniformMatrix4fv(0, 1, gl.TRUE, zm.arrNPtr(&object_to_clip));
     
     // In GLSL: gl_Position = vec4(in_position, 1.0) * object_to_clip;
     
@@ -81,25 +83,25 @@ pub fn main() !void {
         const transform = zm.mul(zm.rotationX(demo.camera.pitch), zm.rotationY(demo.camera.yaw));
         var forward = zm.normalize3(zm.mul(zm.f32x4(0.0, 0.0, 1.0, 0.0), transform));
 
-        zm.store(demo.camera.forward[0..], forward, 3);
+        zm.storeArr3(&demo.camera.forward, forward);
 
         const right = speed * delta_time * zm.normalize3(zm.cross3(zm.f32x4(0.0, 1.0, 0.0, 0.0), forward));
         forward = speed * delta_time * forward;
 
-        var campos = zm.load(demo.camera.position[0..], zm.Vec, 3);
+        var cam_pos = zm.loadArr3(demo.camera.position);
 
         if (keyDown('W')) {
-            campos += forward;
+            cam_pos += forward;
         } else if (keyDown('S')) {
-            campos -= forward;
+            cam_pos -= forward;
         }
         if (keyDown('D')) {
-            campos += right;
+            cam_pos += right;
         } else if (keyDown('A')) {
-            campos -= right;
+            cam_pos -= right;
         }
 
-        zm.store(demo.camera.position[0..], campos, 3);
+        zm.storeArr3(&demo.camera.position, cam_pos);
     }
    
     //

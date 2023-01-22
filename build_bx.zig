@@ -22,7 +22,7 @@ fn buildLibrary(exe: *std.build.LibExeObjStep) *std.build.LibExeObjStep {
     bx_lib.setBuildMode(exe.build_mode);
 
     addBxIncludes(bx_lib);
-    bx_lib.addIncludeDir(bx_path ++ "3rdparty/");
+    bx_lib.addIncludePath(bx_path ++ "3rdparty/");
     if (bx_lib.target.isDarwin()) {
         bx_lib.linkFramework("CoreFoundation");
         bx_lib.linkFramework("Foundation");
@@ -44,10 +44,10 @@ fn addBxIncludes(exe: *std.build.LibExeObjStep) void {
         compat_include = thisDir() ++ "/" ++ bx_path ++ "include/compat/osx/";
     }
 
-    exe.addIncludeDir(compat_include);
-    exe.addIncludeDir(thisDir() ++ "/" ++ bx_path ++ "include/");
+    exe.addIncludePath(compat_include);
+    exe.addIncludePath(thisDir() ++ "/" ++ bx_path ++ "include/");
 }
 
-fn thisDir() []const u8 {
-    return std.fs.path.dirname(@src().file) orelse ".";
+inline fn thisDir() []const u8 {
+    return comptime std.fs.path.dirname(@src().file) orelse ".";
 }

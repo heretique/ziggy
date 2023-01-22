@@ -8,7 +8,7 @@ const tp = @import("build_texture_packer.zig");
 
 const zigstr = @import("build_zigstr.zig");
 const zmath = @import("3rdparty/zmath/build.zig");
-const imgui = @import("3rdparty/Zig-ImGui/zig-imgui/imgui_build.zig");
+const zgui = @import("3rdparty/zgui/build.zig");
 
 const LibExeObjStep = std.build.LibExeObjStep;
 const Builder = std.build.Builder;
@@ -33,7 +33,7 @@ pub fn build(b: *Builder) void {
 
     // sdl2
     if (target.isDarwin()){
-        exe.addFrameworkDir("3rdparty/sdl2/osx");
+        exe.addFrameworkPath("3rdparty/sdl2/osx");
         exe.linkFramework("sdl2");
         exe.linkFramework("Foundation");
         exe.linkFramework("CoreFoundation");
@@ -44,11 +44,17 @@ pub fn build(b: *Builder) void {
         exe.linkFramework("Metal");
     }
     else if (target.isWindows()) {
-        exe.addIncludeDir("3rdparty/sdl2/windows/include");
-        exe.addLibPath("3rdparty/sdl2/windows/win64");
+        exe.addIncludePath("3rdparty/sdl2/windows/include");
+        exe.addLibraryPath("3rdparty/sdl2/windows/win64");
         exe.linkSystemLibrary("sdl2");
         exe.linkSystemLibrary("opengl32");
         exe.linkSystemLibrary("gdi32");
+        exe.linkSystemLibrary("winmm");
+        exe.linkSystemLibrary("setupapi");
+        exe.linkSystemLibrary("ole32");
+        exe.linkSystemLibrary("oleaut32");
+        exe.linkSystemLibrary("imm32");
+        exe.linkSystemLibrary("version");
     }
 
     // zmath
@@ -58,7 +64,13 @@ pub fn build(b: *Builder) void {
     bimg.link(exe);
     bgfx.link(exe);
     zigstr.link(exe);
-    imgui.link(exe);
+
+    // zgui
+    const zgui_options = zgui.BuildOptionsStep.init(b, .{ .backend = .no_backend });
+    const zgui_pkg = zgui.getPkg(&.{zgui_options.getPkg()});
+    exe.addPackage(zgui_pkg);
+    zgui.link(exe, zgui_options);
+
     exe.linkSystemLibrary("c");
     exe.linkSystemLibrary("c++");
     exe.install();
@@ -84,10 +96,8 @@ pub fn build(b: *Builder) void {
 
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&exe_tests.step);
-
-    imgui.addTestStep(b, "imgui:test", mode, target);
 }
 
-fn thisDir() []const u8 {
-    return std.fs.path.dirname(@src().file) orelse ".";
+inline fn thisDir() []const u8 {
+    return comptime std.fs.path.dirname(@src().file) orelse ".";
 }
